@@ -6,11 +6,20 @@ namespace BoxyJump
 {
 	public class DeathPlaneDetection : MonoBehaviour 
 	{
+		public EntityController m_entityController;
+		public GameObject m_entity;
+
 		private void Update()
 		{
-			if (transform.position.y < -1.0f)
+			CheckEntityForCrossingDeathPlane(m_entity);
+		}
+
+		private void CheckEntityForCrossingDeathPlane(GameObject entity)
+		{
+			if (entity.transform.position.y < -1.0f)
 			{
 				// Fell below death plane
+				m_entityController.EntityDied(entity);
 			}
 		}
 	}

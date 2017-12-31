@@ -4,13 +4,59 @@ using UnityEngine;
 
 namespace BoxyJump
 {
-	public struct GeneticData
+	public class GeneticData
 	{
+		public int generation;
+
 		public float horizontalThrust;
 		public float thrustOddsPerSecond;
 
 		public float jumpStrength;
 		public float jumpOddsPerSecond;
+
+		public void Mutate(float mutationChance, float mutationRate)
+		{
+			if (MutateTrait(ref horizontalThrust, mutationChance, mutationRate))
+			{
+				horizontalThrust = Mathf.Clamp(horizontalThrust, 0.0f, 100.0f);
+			}
+
+			if (MutateTrait(ref thrustOddsPerSecond, mutationChance, mutationRate))
+			{
+				horizontalThrust = Mathf.Clamp(thrustOddsPerSecond, 0.0f, 60.0f);
+			}
+
+			if (MutateTrait(ref jumpStrength, mutationChance, mutationRate))
+			{
+				jumpStrength = Mathf.Clamp(jumpStrength, 0.0f, 100.0f);
+			}
+
+			if (MutateTrait(ref jumpOddsPerSecond, mutationChance, mutationRate))
+			{
+				jumpStrength = Mathf.Clamp(jumpOddsPerSecond, 0.0f, 60.0f);
+			}
+		}
+
+		private bool MutateTrait(ref float trait, float mutationChance, float mutationRate)
+		{
+			if (UnityEngine.Random.Range(0.0f, 1.0f) > mutationChance)
+			{
+				return false;
+			}
+
+			float finalMutationRate = GetNextMutationRate(mutationRate);
+
+			trait *= finalMutationRate;
+
+			return true;
+		}
+
+		private float GetNextMutationRate(float mutationRate)
+		{
+			bool positive = (UnityEngine.Random.Range(0.0f, 1.0f) > 0.5f);
+
+			return (positive) ? mutationRate : -mutationRate;
+		}
 	}
 
 	[RequireComponent(typeof(CharacterInputComponent))]
@@ -18,17 +64,12 @@ namespace BoxyJump
 	{
 		public CharacterInputComponent m_charInputComponent;
 
-		private GeneticData m_geneticData;
+		public GeneticData GeneticData { get { return m_geneticData; } }
+		public GeneticData m_geneticData;
 
-		private void Start()
+		public void Initialize(GeneticData data)
 		{
-			// Horz thrust
-			m_geneticData.horizontalThrust = 5.0f;
-			m_geneticData.thrustOddsPerSecond = 0.3f;
-
-			// Jump spring
-			m_geneticData.jumpStrength = 5.0f;
-			m_geneticData.jumpOddsPerSecond = 0.2f;
+			m_geneticData = data;
 		}
 
 		private void Update()

@@ -68,7 +68,7 @@ namespace BoxyJump
 			var aiComp = m_entity.GetComponent<AIComponent>();
 
 			// TODO: Optimize to reduce garbage.
-			m_scoreText.text = "Score: " + m_entityController.Score(aiComp.transform.position.x).ToString("0.00");
+			m_scoreText.text = "Score: " + m_entityController.GetScore(aiComp.transform.position.x).ToString("0.00");
 		}
 	}
 }

@@ -9,7 +9,7 @@ namespace BoxyJump
 		public GameObject m_platform;
 		public float maxHorizontalRange = 20.0f;
 
-		public float m_oddsOfPit = 0.2f;
+		public float m_oddsOfPit = 0.1f;
 
 		private void Start()
 		{
@@ -86,7 +86,10 @@ namespace BoxyJump
 					int seedForX = System.Math.Abs(m_randSeed ^ i);
 					var randGen = new System.Random(seedForX);
 
-					if (randGen.NextDouble() < m_oddsOfPit)
+					double roll = randGen.NextDouble();
+					float log = Mathf.Log10(charPosition.x);
+
+					if (roll < (m_oddsOfPit * log))
 					{
 						// Pit here, so spawn nothing.
 						continue;

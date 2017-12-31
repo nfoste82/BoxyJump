@@ -33,9 +33,7 @@ namespace BoxyJump
 				throw new System.ApplicationException("Entity mismatch!");
 			}
 
-			float score = Score(entity.transform.position.x);
-
-			float timeScoreModifier = Mathf.Log10(Mathf.Max(m_timeForRun, 10));
+			float score = GetScore(entity.transform.position.x);
 
 			m_scoreToDataMap.Add(new KeyValuePair<float, GeneticData>(score, m_generations[m_generations.Count - 1]));
 			m_sortedScoreToGenerationMap.Add(new KeyValuePair<float, int>(score, m_generations.Count - 1));
@@ -64,7 +62,7 @@ namespace BoxyJump
 			return topScores;
 		}
 
-		public float Score(float distance)
+		public float GetScore(float distance)
 		{
 			float timeScoreModifier = Mathf.Log10(Mathf.Max(m_timeForRun, 10));
 
@@ -84,7 +82,7 @@ namespace BoxyJump
 				throw new System.ApplicationException("An entity has already been spawned. There is currently only support for one at a time.");
 			}
 
-			m_entity = Instantiate(m_entityPrefab, new Vector3(0.0f, 5.0f), Quaternion.identity);
+			m_entity = Instantiate(m_entityPrefab, new Vector3(0.0f, 2.0f), Quaternion.identity);
 
 			// Platform spawner
 			m_platformSpawner.m_character = m_entity;
@@ -121,7 +119,7 @@ namespace BoxyJump
 				data.horizontalThrust = 5.0f;
 				data.thrustOddsPerSecond = 2.0f;
 				data.jumpStrength = 5.0f;
-				data.jumpOddsPerSecond = 0.4f;
+				data.jumpOddsPerSecond = 0.7f;
 			}
 			else if (m_generations.Count == 1)
 			{

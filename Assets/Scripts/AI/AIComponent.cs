@@ -61,7 +61,7 @@ namespace BoxyJump
 
 			if (MutateTrait(ref jumpOddsPerSecond, mutationChance, mutationRate))
 			{
-				jumpStrength = Mathf.Clamp(jumpOddsPerSecond, 0.0f, 60.0f);
+				jumpOddsPerSecond = Mathf.Clamp(jumpOddsPerSecond, 0.0f, 60.0f);
 			}
 		}
 

@@ -37,7 +37,20 @@ namespace BoxyJump
 		{
 			var sb = new StringBuilder();
 
-			for (int i = 0; i < m_entityController.ScoresToGeneticData.Count; ++i)
+			sb.AppendLine("Top 3 Scores:");
+			// Top 3 results
+			List<KeyValuePair<float, GeneticData>> topScores = m_entityController.GetTopScores(3);
+			for (int i = 0; i < topScores.Count; ++i)
+			{
+				sb.AppendLine("Gen: " + topScores[i].Value.generation + ", Score: " + topScores[i].Key);
+			}
+			sb.AppendLine();
+
+			sb.AppendLine("10 most recent:");
+
+			// 10 most recent results
+			int startIndex = System.Math.Max(m_entityController.ScoresToGeneticData.Count - 10, 0);
+			for (int i = startIndex; i < m_entityController.ScoresToGeneticData.Count; ++i)
 			{
 				var kvp = m_entityController.ScoresToGeneticData[i];
 
@@ -55,7 +68,7 @@ namespace BoxyJump
 			var aiComp = m_entity.GetComponent<AIComponent>();
 
 			// TODO: Optimize to reduce garbage.
-			m_scoreText.text = "Score: " + aiComp.transform.position.x.ToString("0.00");
+			m_scoreText.text = "Score: " + m_entityController.Score(aiComp.transform.position.x).ToString("0.00");
 		}
 	}
 }

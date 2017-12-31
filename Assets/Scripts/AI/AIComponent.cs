@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace BoxyJump
 {
-	public class GeneticData
+	public struct GeneticData
 	{
 		public int generation;
 
@@ -56,7 +56,7 @@ namespace BoxyJump
 
 			if (MutateTrait(ref jumpStrength, mutationChance, mutationRate))
 			{
-				jumpStrength = Mathf.Clamp(jumpStrength, 0.0f, 100.0f);
+				jumpStrength = Mathf.Clamp(jumpStrength, 1.5f, 100.0f);
 			}
 
 			if (MutateTrait(ref jumpOddsPerSecond, mutationChance, mutationRate))

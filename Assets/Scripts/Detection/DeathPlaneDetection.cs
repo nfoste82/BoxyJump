@@ -7,7 +7,11 @@ namespace BoxyJump
 	public class DeathPlaneDetection : MonoBehaviour 
 	{
 		public EntityController m_entityController;
-		public GameObject m_entity;
+
+		public void NewEntityMade(GameObject entity)
+		{
+			m_entity = entity;
+		}
 
 		private void Update()
 		{
@@ -22,5 +26,8 @@ namespace BoxyJump
 				m_entityController.EntityDied(entity);
 			}
 		}
+
+		private GameObject m_entity;
+		private Vector2 m_posDuringLastCheck;
 	}
 }

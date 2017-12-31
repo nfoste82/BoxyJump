@@ -10,6 +10,7 @@ namespace BoxyJump
 		public GameObject m_entityPrefab;
 		public PlatformSpawner m_platformSpawner;
 		public DeathPlaneDetection m_deathDetector;
+		public SlowProgressDetection m_slowProgressDetector;
 		public EntityInfoDisplay m_entityDisplay;
 
 		// Amount that a mutation will change a trait
@@ -20,6 +21,10 @@ namespace BoxyJump
 
 		public List<KeyValuePair<float, GeneticData>> ScoresToGeneticData { get { return m_scoreToDataMap; } }
 
+		public List<KeyValuePair<float, int>> SortedScoreToGenerationMap { get { return m_sortedScoreToGenerationMap; } }
+
+		public float ElapsedTimeForCurrentRun { get { return m_timeForRun; } }
+
 		public void EntityDied(GameObject entity)
 		{
 			// HACK: For now we only support one entity at a time, so m_entity should always be equal for now
@@ -28,7 +33,9 @@ namespace BoxyJump
 				throw new System.ApplicationException("Entity mismatch!");
 			}
 
-			float score = entity.transform.position.x;
+			float score = Score(entity.transform.position.x);
+
+			float timeScoreModifier = Mathf.Log10(Mathf.Max(m_timeForRun, 10));
 
 			m_scoreToDataMap.Add(new KeyValuePair<float, GeneticData>(score, m_generations[m_generations.Count - 1]));
 			m_sortedScoreToGenerationMap.Add(new KeyValuePair<float, int>(score, m_generations.Count - 1));
@@ -41,12 +48,31 @@ namespace BoxyJump
 			SpawnEntity();
 		}
 
+		public List<KeyValuePair<float, GeneticData>> GetTopScores(int numScores)
+		{
+			numScores = System.Math.Min(numScores, m_sortedScoreToGenerationMap.Count);
+
+			List<KeyValuePair<float, GeneticData>> topScores = new List<KeyValuePair<float, GeneticData>>();
+
+			for (int i = 0; i < numScores; ++i)
+			{
+				KeyValuePair<float, int> scoreToGen = m_sortedScoreToGenerationMap[i];
+
+				topScores.Add(new KeyValuePair<float, GeneticData>(scoreToGen.Key, m_generations[scoreToGen.Value]));
+			}
+
+			return topScores;
+		}
+
+		public float Score(float distance)
+		{
+			float timeScoreModifier = Mathf.Log10(Mathf.Max(m_timeForRun, 10));
+
+			return distance / timeScoreModifier;
+		}
+
 		private void Start()
 		{
-			// TODO: Do something other than this, this is gross.
-			m_entityDisplay = GetComponent<EntityInfoDisplay>();
-			m_entityDisplay.m_entityController = this;
-
 			SpawnEntity();
 		}
 
@@ -64,7 +90,10 @@ namespace BoxyJump
 			m_platformSpawner.m_character = m_entity;
 
 			// Death plane detector
-			m_deathDetector.m_entity = m_entity;
+			m_deathDetector.NewEntityMade(m_entity);
+
+			// Slow progress detector
+			m_slowProgressDetector.NewEntityMade(m_entity);
 
 			// Generate new genetic data
 			GeneticData data = GenerateNextGeneration();
@@ -78,6 +107,8 @@ namespace BoxyJump
 
 			// Entity Display
 			m_entityDisplay.NewEntityMade(m_entity, data);
+
+			m_timeForRun = 0.0f;
 		}
 
 		private GeneticData GenerateNextGeneration()
@@ -88,9 +119,9 @@ namespace BoxyJump
 			{
 				data = new GeneticData();
 				data.horizontalThrust = 5.0f;
-				data.thrustOddsPerSecond = 0.3f;
+				data.thrustOddsPerSecond = 2.0f;
 				data.jumpStrength = 5.0f;
-				data.jumpOddsPerSecond = 0.2f;
+				data.jumpOddsPerSecond = 0.4f;
 			}
 			else if (m_generations.Count == 1)
 			{
@@ -115,7 +146,14 @@ namespace BoxyJump
 			return data;
 		}
 
+		private void Update()
+		{
+			m_timeForRun += Time.deltaTime;
+		}
+
 		private GameObject m_entity;
+		private float m_timeForRun;
+
 		private List<GeneticData> m_generations = new List<GeneticData>();
 		private List<KeyValuePair<float, GeneticData>> m_scoreToDataMap = new List<KeyValuePair<float, GeneticData>>();
 		private List<KeyValuePair<float, int>> m_sortedScoreToGenerationMap = new List<KeyValuePair<float, int>>();

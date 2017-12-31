@@ -17,7 +17,7 @@ namespace BoxyJump
 
 			Vector3 charPosition = m_character.transform.position;
 			Vector3 backPosition = charPosition;
-			backPosition.x -= 10.0f;
+			backPosition.x -= 10.0f; 
 
 			SpawnGroundPlatforms(backPosition);
 

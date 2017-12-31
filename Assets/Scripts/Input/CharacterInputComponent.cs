@@ -6,9 +6,10 @@ namespace BoxyJump
 {
 	public class CharacterInputComponent : MonoBehaviour 
 	{
+		public bool Grounded { get; private set; }
+
 		public Rigidbody2D m_rigidBody;
 		public Camera m_camera;
-
 		public float m_speed;
 
 		private void Update() 
@@ -22,38 +23,88 @@ namespace BoxyJump
 			Vector2 endPos = startPos;
 			endPos.y -= 0.75f;
 
-			grounded = m_rigidBody.velocity.y <= 0.1f && Physics2D.Linecast(startPos, endPos, 1 << LayerMask.NameToLayer("Ground"));
-
-			Vector2 newVelocity = m_rigidBody.velocity;
-
-			bool changed = false;
+			Grounded = m_rigidBody.velocity.y <= 0.1f && Physics2D.Linecast(startPos, endPos, 1 << LayerMask.NameToLayer("Ground"));
 
 			// Move forward
-			if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
+			if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
 			{
-				changed = true;
-				newVelocity.x += m_speed;
+				AddThrust(m_speed);
 			}
 
-			if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
+			if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
 			{
-				changed = true;
-				newVelocity.x -= m_speed;
+				AddThrust(-m_speed);
 			}
 
 			// Jump
- 			if (grounded && Input.GetKeyDown(KeyCode.Space))
+			if (Grounded && Input.GetKeyDown(KeyCode.Space))
 			{
-				changed = true;
-				newVelocity.y += 5.0f;
+				Jump();
 			}
 
-			if (changed)
+			ApplyInputs();
+		}
+
+		public void ApplyInputs()
+		{
+			Vector2 newVelocity = m_rigidBody.velocity;
+			bool change = false;
+
+			if (m_thrust.HasValue)
+			{
+				newVelocity.x += m_thrust.Value;
+
+				newVelocity.x = Mathf.Clamp(newVelocity.x, -m_speed, m_speed);
+
+				change = true;
+				m_thrust = null;
+			}
+
+			if (m_jump)
+			{
+				newVelocity.y += 5.0f;
+
+				change = true;
+				m_jump = false;
+			}
+
+			if (change)
 			{
 				m_rigidBody.velocity = newVelocity;
 			}
 		}
 
-		private bool grounded = false;
+		public void AddThrust(float thrust)
+		{
+			if (m_thrust == null)
+			{
+				m_thrust = thrust;
+			}
+			else
+			{
+				m_thrust += thrust;
+
+				if (m_thrust.Value == 0.0f)
+				{
+					m_thrust = null;
+				}
+			}
+		}
+
+		public void Jump()
+		{
+			if (m_jump)
+			{
+				return;
+			}
+
+			if (Grounded)
+			{
+				m_jump = true;
+			}
+		}
+	
+		public float? m_thrust;
+		public bool m_jump;
 	}
 }

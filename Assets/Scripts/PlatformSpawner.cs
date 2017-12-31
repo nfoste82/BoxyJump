@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace BoxyJump
 {
-	public class SpawnPlatforms : MonoBehaviour 
+	public class PlatformSpawner : MonoBehaviour 
 	{
 		public GameObject m_character;
 		public GameObject m_platform;
@@ -13,11 +13,11 @@ namespace BoxyJump
 
 		private void Start()
 		{
-			m_randSeed = System.DateTime.UtcNow.Ticks / System.TimeSpan.TicksPerSecond;
+			m_randSeed = (int)(System.DateTime.UtcNow.Ticks / System.TimeSpan.TicksPerSecond);
 
 			Vector3 charPosition = m_character.transform.position;
 			Vector3 backPosition = charPosition;
-			backPosition.x -= 10.0f; 
+			backPosition.x -= 10.0f;
 
 			SpawnGroundPlatforms(backPosition);
 

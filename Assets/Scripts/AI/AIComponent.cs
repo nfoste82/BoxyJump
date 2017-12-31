@@ -14,6 +14,34 @@ namespace BoxyJump
 		public float jumpStrength;
 		public float jumpOddsPerSecond;
 
+		public GeneticData Mate(GeneticData other)
+		{
+			GeneticData result = this;
+
+			// 50% chance to use 'other'
+			if (UnityEngine.Random.Range(0.0f, 1.0f) > 0.5f)
+			{
+				result.horizontalThrust = other.horizontalThrust;	
+			}
+
+			if (UnityEngine.Random.Range(0.0f, 1.0f) > 0.5f)
+			{
+				result.thrustOddsPerSecond = other.thrustOddsPerSecond;	
+			}
+
+			if (UnityEngine.Random.Range(0.0f, 1.0f) > 0.5f)
+			{
+				result.jumpStrength = other.jumpStrength;	
+			}
+
+			if (UnityEngine.Random.Range(0.0f, 1.0f) > 0.5f)
+			{
+				result.jumpOddsPerSecond = other.jumpOddsPerSecond;	
+			}
+
+			return result;
+		}
+
 		public void Mutate(float mutationChance, float mutationRate)
 		{
 			if (MutateTrait(ref horizontalThrust, mutationChance, mutationRate))
@@ -46,7 +74,7 @@ namespace BoxyJump
 
 			float finalMutationRate = GetNextMutationRate(mutationRate);
 
-			trait *= finalMutationRate;
+			trait += (trait * finalMutationRate);
 
 			return true;
 		}

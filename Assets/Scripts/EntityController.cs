@@ -10,12 +10,15 @@ namespace BoxyJump
 		public GameObject m_entityPrefab;
 		public PlatformSpawner m_platformSpawner;
 		public DeathPlaneDetection m_deathDetector;
+		public EntityInfoDisplay m_entityDisplay;
 
 		// Amount that a mutation will change a trait
 		public float m_mutationRate = 0.1f;
 
 		// Percentage chance that a trait mutates a trait
 		public float m_mutationChance = 0.25f;
+
+		public List<KeyValuePair<float, GeneticData>> ScoresToGeneticData { get { return m_scoreToDataMap; } }
 
 		public void EntityDied(GameObject entity)
 		{
@@ -27,7 +30,10 @@ namespace BoxyJump
 
 			float score = entity.transform.position.x;
 
-			m_scoreToDataMap.Add(score, m_generations[m_generations.Count - 1]);
+			m_scoreToDataMap.Add(new KeyValuePair<float, GeneticData>(score, m_generations[m_generations.Count - 1]));
+			m_sortedScoreToGenerationMap.Add(new KeyValuePair<float, int>(score, m_generations.Count - 1));
+
+			m_sortedScoreToGenerationMap.Sort((a, b) => b.Key.CompareTo(a.Key));
 
 			Destroy(entity);
 			m_entity = null;
@@ -37,6 +43,10 @@ namespace BoxyJump
 
 		private void Start()
 		{
+			// TODO: Do something other than this, this is gross.
+			m_entityDisplay = GetComponent<EntityInfoDisplay>();
+			m_entityDisplay.m_entityController = this;
+
 			SpawnEntity();
 		}
 
@@ -65,29 +75,41 @@ namespace BoxyJump
 
 			AIComponent aiComp = m_entity.GetComponent<AIComponent>();
 			aiComp.Initialize(data);
+
+			// Entity Display
+			m_entityDisplay.NewEntityMade(m_entity, data);
 		}
 
 		private GeneticData GenerateNextGeneration()
 		{
-			GeneticData data = new GeneticData();
-			data.generation = m_generations.Count;
+			GeneticData data;
 
 			if (m_generations.Count == 0)
 			{
+				data = new GeneticData();
 				data.horizontalThrust = 5.0f;
 				data.thrustOddsPerSecond = 0.3f;
 				data.jumpStrength = 5.0f;
 				data.jumpOddsPerSecond = 0.2f;
 			}
+			else if (m_generations.Count == 1)
+			{
+				data = m_generations[m_generations.Count - 1];
+
+				data.Mutate(m_mutationChance, m_mutationRate);
+			}
 			else
 			{
-				int generation = data.generation;
-				data = m_generations[m_generations.Count - 1];		// TODO: Factor in best scores
-				data.generation = generation;
+				// Mate the two best scores
+				GeneticData bestData = m_generations[m_sortedScoreToGenerationMap[0].Value];
+				GeneticData nextBestData = m_generations[m_sortedScoreToGenerationMap[1].Value];
+
+				data = bestData.Mate(nextBestData);
 
 				data.Mutate(m_mutationChance, m_mutationRate);
 			}
 
+			data.generation = m_generations.Count;
 			m_generations.Add(data);
 
 			return data;
@@ -95,6 +117,7 @@ namespace BoxyJump
 
 		private GameObject m_entity;
 		private List<GeneticData> m_generations = new List<GeneticData>();
-		private Dictionary<float, GeneticData> m_scoreToDataMap = new Dictionary<float, GeneticData>();
+		private List<KeyValuePair<float, GeneticData>> m_scoreToDataMap = new List<KeyValuePair<float, GeneticData>>();
+		private List<KeyValuePair<float, int>> m_sortedScoreToGenerationMap = new List<KeyValuePair<float, int>>();
 	}
 }

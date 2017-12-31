@@ -10,7 +10,6 @@ namespace BoxyJump
 
 		public Rigidbody2D m_rigidBody;
 		public Camera m_camera;
-		public float m_speed;
 
 		private void Update() 
 		{
@@ -25,15 +24,17 @@ namespace BoxyJump
 
 			Grounded = m_rigidBody.velocity.y <= 0.1f && Physics2D.Linecast(startPos, endPos, 1 << LayerMask.NameToLayer("Ground"));
 
+			AIComponent aiComp = GetComponent<AIComponent>();
+
 			// Move forward
 			if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
 			{
-				AddThrust(m_speed);
+				AddThrust(aiComp.GeneticData.horizontalThrust);
 			}
 
 			if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
 			{
-				AddThrust(-m_speed);
+				AddThrust(-aiComp.GeneticData.horizontalThrust);
 			}
 
 			// Jump
@@ -50,11 +51,13 @@ namespace BoxyJump
 			Vector2 newVelocity = m_rigidBody.velocity;
 			bool change = false;
 
+			AIComponent aiComp = GetComponent<AIComponent>();
+
 			if (m_thrust.HasValue)
 			{
 				newVelocity.x += m_thrust.Value;
 
-				newVelocity.x = Mathf.Clamp(newVelocity.x, -m_speed, m_speed);
+				newVelocity.x = Mathf.Clamp(newVelocity.x, -aiComp.GeneticData.horizontalThrust, aiComp.GeneticData.horizontalThrust);
 
 				change = true;
 				m_thrust = null;
@@ -62,7 +65,7 @@ namespace BoxyJump
 
 			if (m_jump)
 			{
-				newVelocity.y += 5.0f;
+				newVelocity.y += aiComp.GeneticData.jumpStrength;
 
 				change = true;
 				m_jump = false;

@@ -17,6 +17,7 @@ namespace BoxyJump
 		public Text m_horzOdds;
 		public Text m_jumpStrength;
 		public Text m_jumpOdds;
+		public Text m_jumpAngle;
 
 		public Text m_results;
 
@@ -29,6 +30,7 @@ namespace BoxyJump
 			m_horzOdds.text = "Horz. Odds/s: " + (data.thrustOddsPerSecond * 100.0f).ToString("0") + "%";
 			m_jumpStrength.text = "Jump Strength: " + data.jumpStrength.ToString("0.0");
 			m_jumpOdds.text = "Jump Odds/s: " + (data.jumpOddsPerSecond * 100.0f).ToString("0") + "%";
+			m_jumpAngle.text = "Jump Angle: " + data.jumpAngle.ToString("0.0");
 
 			DisplayResults();
 		}

@@ -65,7 +65,10 @@ namespace BoxyJump
 
 			if (m_jump)
 			{
-				newVelocity.y += aiComp.GeneticData.jumpStrength;
+				Vector2 jumpVector = VectorUtils.Vector2FromAngleDegrees(aiComp.GeneticData.jumpAngle);
+				jumpVector *= aiComp.GeneticData.jumpStrength;
+
+				newVelocity += jumpVector;
 
 				change = true;
 				m_jump = false;

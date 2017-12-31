@@ -13,6 +13,8 @@ namespace BoxyJump
 
 		public float jumpStrength;
 		public float jumpOddsPerSecond;
+		public float jumpAngle;		// 90 variance here, from pointing to +X, to +Y.
+
 
 		public GeneticData Mate(GeneticData other)
 		{
@@ -39,6 +41,11 @@ namespace BoxyJump
 				result.jumpOddsPerSecond = other.jumpOddsPerSecond;	
 			}
 
+			if (UnityEngine.Random.Range(0.0f, 1.0f) > 0.5f)
+			{
+				result.jumpAngle = other.jumpAngle;	
+			}
+
 			return result;
 		}
 
@@ -62,6 +69,11 @@ namespace BoxyJump
 			if (MutateTrait(ref jumpOddsPerSecond, mutationChance, mutationRate))
 			{
 				jumpOddsPerSecond = Mathf.Clamp(jumpOddsPerSecond, 0.0f, 60.0f);
+			}
+
+			if (MutateTrait(ref jumpAngle, mutationChance, mutationRate))
+			{
+				jumpAngle = Mathf.Clamp(jumpAngle, 15.0f, 90.0f);
 			}
 		}
 

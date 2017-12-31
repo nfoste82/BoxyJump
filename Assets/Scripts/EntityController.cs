@@ -120,6 +120,7 @@ namespace BoxyJump
 				data.thrustOddsPerSecond = 2.0f;
 				data.jumpStrength = 5.0f;
 				data.jumpOddsPerSecond = 0.7f;
+				data.jumpAngle = 90.0f;
 			}
 			else if (m_generations.Count == 1)
 			{
@@ -129,11 +130,11 @@ namespace BoxyJump
 			}
 			else
 			{
-				// Mate the two best scores
+				// Mate the best score with previous gen
 				GeneticData bestData = m_generations[m_sortedScoreToGenerationMap[0].Value];
-				GeneticData nextBestData = m_generations[m_sortedScoreToGenerationMap[1].Value];
+				GeneticData lastGenData = m_generations[m_generations.Count - 1];
 
-				data = bestData.Mate(nextBestData);
+				data = bestData.Mate(lastGenData);
 
 				data.Mutate(m_mutationChance, m_mutationRate);
 			}

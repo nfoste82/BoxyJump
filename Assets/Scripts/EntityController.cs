@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -35,7 +36,8 @@ namespace BoxyJump
 
 			float score = GetScore(entity.transform.position.x);
 
-			m_scoreToDataMap.Add(new KeyValuePair<float, GeneticData>(score, m_generations[m_generations.Count - 1]));
+			m_generations[m_generations.Count - 1] = new KeyValuePair<float, GeneticData>(score, m_generations[m_generations.Count - 1].Value);
+			m_scoreToDataMap.Add(new KeyValuePair<float, GeneticData>(score, m_generations[m_generations.Count - 1].Value));
 			m_sortedScoreToGenerationMap.Add(new KeyValuePair<float, int>(score, m_generations.Count - 1));
 
 			m_sortedScoreToGenerationMap.Sort((a, b) => b.Key.CompareTo(a.Key));
@@ -56,7 +58,7 @@ namespace BoxyJump
 			{
 				KeyValuePair<float, int> scoreToGen = m_sortedScoreToGenerationMap[i];
 
-				topScores.Add(new KeyValuePair<float, GeneticData>(scoreToGen.Key, m_generations[scoreToGen.Value]));
+				topScores.Add(new KeyValuePair<float, GeneticData>(scoreToGen.Key, m_generations[scoreToGen.Value].Value));
 			}
 
 			return topScores;
@@ -82,7 +84,7 @@ namespace BoxyJump
 				throw new System.ApplicationException("An entity has already been spawned. There is currently only support for one at a time.");
 			}
 
-			m_entity = Instantiate(m_entityPrefab, new Vector3(0.0f, 2.0f), Quaternion.identity);
+			m_entity = Instantiate(m_entityPrefab, new Vector3(0.0f, 1.0f), Quaternion.identity);
 
 			// Platform spawner
 			m_platformSpawner.m_character = m_entity;
@@ -93,14 +95,15 @@ namespace BoxyJump
 			// Slow progress detector
 			m_slowProgressDetector.NewEntityMade(m_entity);
 
-			// Generate new genetic data
-			GeneticData data = GenerateNextGeneration();
-
 			// Setup the entity
 			CharacterInputComponent charInputComp = m_entity.GetComponent<CharacterInputComponent>();
 			charInputComp.m_camera = m_mainCamera;
 
 			AIComponent aiComp = m_entity.GetComponent<AIComponent>();
+
+			// Generate new genetic data
+			GeneticData data = GenerateNextGeneration();
+
 			aiComp.Initialize(data);
 
 			// Entity Display
@@ -116,31 +119,34 @@ namespace BoxyJump
 			if (m_generations.Count == 0)
 			{
 				data = new GeneticData();
-				data.horizontalThrust = 5.0f;
-				data.thrustOddsPerSecond = 2.0f;
-				data.jumpStrength = 5.0f;
-				data.jumpOddsPerSecond = 0.7f;
-				data.jumpAngle = 90.0f;
+				data.Initialize();
 			}
 			else if (m_generations.Count == 1)
 			{
-				data = m_generations[m_generations.Count - 1];
-
-				data.Mutate(m_mutationChance, m_mutationRate);
+				data = m_generations[m_generations.Count - 1].Value;
 			}
 			else
 			{
-				// Mate the best score with previous gen
-				GeneticData bestData = m_generations[m_sortedScoreToGenerationMap[0].Value];
-				GeneticData lastGenData = m_generations[m_generations.Count - 1];
+				// Mate the best score with the most recent generation that made some progress
+				GeneticData bestData = m_generations[m_sortedScoreToGenerationMap[0].Value].Value;
 
-				data = bestData.Mate(lastGenData);
+				GeneticData recentGenData = m_generations[m_generations.Count - 1].Value;
 
-				data.Mutate(m_mutationChance, m_mutationRate);
+				for (int i = m_generations.Count - 1; i > 0; --i)
+				{
+					if (m_generations[i].Key > 5.0f)
+					{
+						recentGenData = m_generations[i].Value;
+						break;
+					}
+				}
+
+				data = bestData.Mate(recentGenData);
 			}
 
+			data.Mutate(m_mutationChance, m_mutationRate);
 			data.generation = m_generations.Count;
-			m_generations.Add(data);
+			m_generations.Add(new KeyValuePair<float, GeneticData>(0.0f, data));
 
 			return data;
 		}
@@ -153,7 +159,7 @@ namespace BoxyJump
 		private GameObject m_entity;
 		private float m_timeForRun;
 
-		private List<GeneticData> m_generations = new List<GeneticData>();
+		private List<KeyValuePair<float, GeneticData>> m_generations = new List<KeyValuePair<float, GeneticData>>();
 		private List<KeyValuePair<float, GeneticData>> m_scoreToDataMap = new List<KeyValuePair<float, GeneticData>>();
 		private List<KeyValuePair<float, int>> m_sortedScoreToGenerationMap = new List<KeyValuePair<float, int>>();
 	}

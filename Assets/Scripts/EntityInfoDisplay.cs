@@ -13,11 +13,7 @@ namespace BoxyJump
 
 		public Text m_generationText;
 		public Text m_scoreText;
-		public Text m_horzThrust;
-		public Text m_horzOdds;
-		public Text m_jumpStrength;
-		public Text m_jumpOdds;
-		public Text m_jumpAngle;
+		public Text m_responses;
 
 		public Text m_results;
 
@@ -26,13 +22,10 @@ namespace BoxyJump
 			m_entity = entity;
 
 			m_generationText.text = "Generation: " + data.generation;
-			m_horzThrust.text = "Horz. Thrust: " + data.horizontalThrust.ToString("0.0");
-			m_horzOdds.text = "Horz. Odds/s: " + (data.thrustOddsPerSecond * 100.0f).ToString("0") + "%";
-			m_jumpStrength.text = "Jump Strength: " + data.jumpStrength.ToString("0.0");
-			m_jumpOdds.text = "Jump Odds/s: " + (data.jumpOddsPerSecond * 100.0f).ToString("0") + "%";
-			m_jumpAngle.text = "Jump Angle: " + data.jumpAngle.ToString("0.0");
 
 			DisplayResults();
+
+			DisplayResponses();
 		}
 
 		private void DisplayResults()
@@ -63,6 +56,31 @@ namespace BoxyJump
 			}
 
 			m_results.text = sb.ToString();
+		}
+
+		private void DisplayResponses()
+		{
+			AIComponent aiComp = m_entity.GetComponent<AIComponent>();
+
+			var sb = new StringBuilder();
+			sb.AppendLine("Receptors/Responses:");
+
+			Dictionary<ReceptorType, Response> responses = aiComp.GeneticData.m_responses;
+			foreach (var kvp in responses)
+			{
+				// TODO: Create FastToString to prevent enum.ToString() perf hits
+				sb.AppendLine("Has receptor: " + aiComp.GeneticData.m_receptors.Contains(kvp.Key));
+				sb.AppendLine(kvp.Key.ToString() + ", " + kvp.Value.GetType().Name);
+				sb.AppendLine("Odds: " + kvp.Value.data.odds + ", Amount: " + kvp.Value.data.amount);
+
+				if (kvp.Value is JumpResponse)
+				{
+					sb.AppendLine("Angle: " + kvp.Value.data.secondaryValue);
+				}
+				sb.AppendLine();
+			}
+
+			m_responses.text = sb.ToString();
 		}
 
 		private void Update()

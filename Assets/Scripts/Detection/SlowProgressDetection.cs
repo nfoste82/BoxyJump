@@ -15,7 +15,7 @@ namespace BoxyJump
 		{
 			m_entity = entity;
 			m_totalTime = 0.0f;
-			m_timeUntilNextCheck = secondsBetweenChecks;
+			m_timeUntilNextCheck = secondsBetweenChecks + 1.0f;
 		}
 
 		private void Start()

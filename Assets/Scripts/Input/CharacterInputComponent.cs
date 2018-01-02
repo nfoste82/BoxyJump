@@ -6,9 +6,8 @@ namespace BoxyJump
 {
 	public class CharacterInputComponent : MonoBehaviour 
 	{
-		public bool Grounded { get; private set; }
-
-		public Rigidbody2D m_rigidBody;
+		public PhysicsComponent m_physics;
+		public AIComponent m_aiComp;
 		public Camera m_camera;
 
 		private void Update() 
@@ -17,30 +16,21 @@ namespace BoxyJump
 			cameraPosition.x = transform.position.x;
 			m_camera.transform.position = cameraPosition;
 
-			Vector2 startPos = m_rigidBody.transform.position;
-
-			Vector2 endPos = startPos;
-			endPos.y -= 0.75f;
-
-			Grounded = m_rigidBody.velocity.y <= 0.1f && Physics2D.Linecast(startPos, endPos, 1 << LayerMask.NameToLayer("Ground"));
-
-			AIComponent aiComp = GetComponent<AIComponent>();
-
 			// Move forward
 			if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
 			{
-				AddThrust(aiComp.GeneticData.horizontalThrust);
+				AddThrust(5.0f);
 			}
 
 			if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
 			{
-				AddThrust(-aiComp.GeneticData.horizontalThrust);
+				AddThrust(-5.0f);
 			}
 
 			// Jump
-			if (Grounded && Input.GetKeyDown(KeyCode.Space))
+			if (Input.GetKeyDown(KeyCode.Space))
 			{
-				Jump();
+  				Jump(Vector2.up * 5.0f);
 			}
 
 			ApplyInputs();
@@ -48,35 +38,30 @@ namespace BoxyJump
 
 		public void ApplyInputs()
 		{
-			Vector2 newVelocity = m_rigidBody.velocity;
+			Vector2 newVelocity = m_physics.Velocity;
 			bool change = false;
-
-			AIComponent aiComp = GetComponent<AIComponent>();
 
 			if (m_thrust.HasValue)
 			{
 				newVelocity.x += m_thrust.Value;
 
-				newVelocity.x = Mathf.Clamp(newVelocity.x, -aiComp.GeneticData.horizontalThrust, aiComp.GeneticData.horizontalThrust);
+				newVelocity.x = Mathf.Clamp(newVelocity.x, -m_thrust.Value, m_thrust.Value);
 
 				change = true;
 				m_thrust = null;
 			}
 
-			if (m_jump)
+			if (m_jump.HasValue)
 			{
-				Vector2 jumpVector = VectorUtils.Vector2FromAngleDegrees(aiComp.GeneticData.jumpAngle);
-				jumpVector *= aiComp.GeneticData.jumpStrength;
-
-				newVelocity += jumpVector;
+				newVelocity += m_jump.Value;
 
 				change = true;
-				m_jump = false;
+				m_jump = null;
 			}
 
 			if (change)
 			{
-				m_rigidBody.velocity = newVelocity;
+				m_physics.Velocity = newVelocity;
 			}
 		}
 
@@ -97,20 +82,29 @@ namespace BoxyJump
 			}
 		}
 
-		public void Jump()
+		public void Jump(Vector2 velocity)
 		{
-			if (m_jump)
+			if (!m_physics.Grounded || m_jump != null)
 			{
 				return;
 			}
 
-			if (Grounded)
+			if (m_jump == null)
 			{
-				m_jump = true;
+				m_jump = velocity;
+			}
+			else
+			{
+				m_jump += velocity;
+
+				if (m_jump.Value == Vector2.zero)
+				{
+					m_jump = null;
+				}
 			}
 		}
 	
 		public float? m_thrust;
-		public bool m_jump;
+		public Vector2? m_jump;
 	}
 }

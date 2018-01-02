@@ -24,6 +24,7 @@ GameObject:
   - component: {fileID: 61066094150819474}
   - component: {fileID: 114254194980360476}
   - component: {fileID: 114309778368001404}
+  - component: {fileID: 114865756476628494}
   m_Layer: 0
   m_Name: Entity
   m_TagString: Untagged
@@ -100,10 +101,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 077053b2403af4df69662dde30944e13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_rigidBody: {fileID: 50002871920564368}
+  m_physics: {fileID: 114865756476628494}
+  m_aiComp: {fileID: 114309778368001404}
   m_camera: {fileID: 0}
-  m_speed: 5
-  m_jump: 0
 --- !u!114 &114309778368001404
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -116,6 +116,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_charInputComponent: {fileID: 114254194980360476}
+  m_physicsComponent: {fileID: 114865756476628494}
+--- !u!114 &114865756476628494
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1221900033456648}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11a56f3aaa0724ed58dce1ccf3835d0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_rigidBody: {fileID: 50002871920564368}
+  m_collider: {fileID: 61066094150819474}
 --- !u!212 &212366108919077048
 SpriteRenderer:
   m_ObjectHideFlags: 1
